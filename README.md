@@ -1,57 +1,90 @@
-# Project Name
+---
+page_type: sample
+description: An Azure Maps Web SDK module that provides a control that makes it easy to bring any data loaded on the map into view.
+languages:
+- javascript
+- typescript
+products:
+- azure
+- azure-maps
+---
 
-(short, 1-3 sentenced, description of the project)
+# Azure Maps Bing Data into View Control module
 
-## Features
+An Azure Maps Web SDK module that provides a control that makes it easy to bring any data loaded on the map into view.
 
-This project framework provides the following features:
+**Samples**
 
-* Feature 1
-* Feature 2
-* ...
+[Geolocation control](https://azuremapscodesamples.azurewebsites.net/index.html?sample=Bring%20Data%20Into%20View%20Control)
+<br/>[<img src="https://github.com/Azure-Samples/AzureMapsCodeSamples/raw/master/AzureMapsCodeSamples/SiteResources/screenshots/Bring-Data-Into-View-Control.jpg" height="200px">](https://azuremapscodesamples.azurewebsites.net/index.html?sample=Bring%20Data%20Into%20View%20Control)
 
-## Getting Started
+## Getting started
 
-### Prerequisites
+Download the project and copy the `azure-maps-bring-data-into-view-control` JavaScript file from the `dist` folder into your project. 
 
-(ideally very short, if any)
+**Usage**
 
-- OS
-- Library version
-- ...
+```JavaScript
+//Add the bring data into view control to the map.
+map.controls.add(new atlas.control.BringDataIntoViewControl());
+```
 
-### Installation
+## API Reference
 
-(ideally very short)
+### BringDataIntoViewControl class
 
-- npm install [package name]
-- mvn install
-- ...
+Implements: `atlas.Control`
 
-### Quickstart
-(Add steps to get up and running quickly)
+Namespace: `atlas.control`
 
-1. git clone [repository clone url]
-2. cd [respository name]
-3. ...
+A control that makes it easy to bring any data loaded on the map into view.
 
+**Contstructor**
 
-## Demo
+> `BringDataIntoViewControl(options?: BringDataIntoViewControlOptions)`
 
-A demo app is included to show how to use the project.
+### BringDataIntoViewControlOptions interface
 
-To run the demo, follow these steps:
+Options for the `BringDataIntoViewControl`.
 
-(Add steps to start up the demo)
+**Properties** 
 
-1.
-2.
-3.
+| Name | Type | Description |
+|------|------|-------------|
+| `padding` | `number` | The amount of pixel padding around the data to account for when setting the map view. Default: `100` |
+| `style` | `atlas.ControlStyle` \| `string` | The style of the control. Can be; `light`, `dark`, `auto`, or any CSS3 color. When set to auto, the style will change based on the map style. Overridden if device is in high contrast mode. Default `light`. |
 
-## Resources
+## Related Projects
 
-(Any additional resources or related projects)
+* [Azure Maps Web SDK Open modules](https://github.com/microsoft/Maps/blob/master/AzureMaps.md#open-web-sdk-modules) - A collection of open source modules that extend the Azure Maps Web SDK.
+* [Azure Maps Web SDK Samples](https://github.com/Azure-Samples/AzureMapsCodeSamples)
+* [Azure Maps Gov Cloud Web SDK Samples](https://github.com/Azure-Samples/AzureMapsGovCloudCodeSamples)
+* [Azure Maps & Azure Active Directory Samples](https://github.com/Azure-Samples/Azure-Maps-AzureAD-Samples)
+* [List of open-source Azure Maps projects](https://github.com/microsoft/Maps/blob/master/AzureMaps.md)
 
-- Link to supporting information
-- Link to similar sample
-- ...
+## Additional Resources
+
+* [Azure Maps (main site)](https://azure.com/maps)
+* [Azure Maps Documentation](https://docs.microsoft.com/azure/azure-maps/index)
+* [Azure Maps Blog](https://azure.microsoft.com/blog/topics/azure-maps/)
+* [Microsoft Q&A](https://docs.microsoft.com/answers/topics/azure-maps.html)
+* [Azure Maps feedback](https://feedback.azure.com/forums/909172-azure-maps)
+
+## Contributing
+
+We welcome contributions. Feel free to submit code samples, file issues and pull requests on the repo and we'll address them as we can. 
+Learn more about how you can help on our [Contribution Rules & Guidelines](https://github.com/Azure-Samples/azure-maps-bring-data-into-view-control/blob/main/CONTRIBUTING.md). 
+
+You can reach out to us anytime with questions and suggestions using our communities below:
+* [Microsoft Q&A](https://docs.microsoft.com/answers/topics/azure-maps.html)
+* [Azure Maps feedback](https://feedback.azure.com/forums/909172-azure-maps)
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). 
+For more information, see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or 
+contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## License
+
+MIT
+ 
+See [License](https://github.com/Azure-Samples/azure-maps-bring-data-into-view-control/blob/main/LICENSE.md) for full license text.
