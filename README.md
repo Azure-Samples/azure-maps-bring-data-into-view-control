@@ -15,12 +15,12 @@ An Azure Maps Web SDK module that provides a control that makes it easy to bring
 
 **Samples**
 
-[Geolocation control](https://azuremapscodesamples.azurewebsites.net/index.html?sample=Bring%20Data%20Into%20View%20Control)
+[Bring data into view control](https://azuremapscodesamples.azurewebsites.net/index.html?sample=Bring%20Data%20Into%20View%20Control)
 <br/>[<img src="https://github.com/Azure-Samples/AzureMapsCodeSamples/raw/master/AzureMapsCodeSamples/SiteResources/screenshots/Bring-Data-Into-View-Control.jpg" height="200px">](https://azuremapscodesamples.azurewebsites.net/index.html?sample=Bring%20Data%20Into%20View%20Control)
 
 ## Getting started
 
-Download the project and copy the `azure-maps-bring-data-into-view-control` JavaScript file from the `dist` folder into your project. 
+Download the project and copy the `azure-maps-bring-data-into-view-control` JavaScript file from the `dist` folder into your project.
 
 **Usage**
 
