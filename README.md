@@ -15,8 +15,8 @@ An Azure Maps Web SDK module that provides a control that makes it easy to bring
 
 **Samples**
 
-[Bring data into view control](https://azuremapscodesamples.azurewebsites.net/index.html?sample=Bring%20Data%20Into%20View%20Control)
-<br/>[<img src="https://github.com/Azure-Samples/AzureMapsCodeSamples/raw/master/AzureMapsCodeSamples/SiteResources/screenshots/Bring-Data-Into-View-Control.jpg" height="200px">](https://azuremapscodesamples.azurewebsites.net/index.html?sample=Bring%20Data%20Into%20View%20Control)
+[Bring data into view control](https://samples.azuremaps.com/?search=bring%20data&sample=bring-data-into-view-control)
+<br/>[<img src="https://samples.azuremaps.com/controls/bring-data-into-view-control/screenshot.jpg" height="200px">](https://samples.azuremaps.com/?search=bring%20data&sample=bring-data-into-view-control)
 
 ## Getting started
 
