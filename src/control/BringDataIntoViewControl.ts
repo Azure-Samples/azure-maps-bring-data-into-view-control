@@ -14,7 +14,10 @@ export class BringDataIntoViewControl implements azmaps.Control {
     private _map: azmaps.Map;
     private _options: BringDataIntoViewControlOptions = {
         style: 'light',
-        padding: 100
+        padding: 100,
+        includeImageLayers: true,
+        includeMarkers: true,
+        sources: null
     };
 
     private _buttonCSS = '.azmaps-bringDataIntoViewBtn{margin:0;padding:0;border:none;border-collapse:collapse;width:32px;height:32px;text-align:center;cursor:pointer;line-height:32px;background-repeat:no-repeat;background-size:20px;background-position:center center;z-index:200;box-shadow:0px 0px 4px rgba(0,0,0,0.16);background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAABcRAAAXEQHKJvM/AAAAB3RJTUUH4wMIFTgXULHJFAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAhUlEQVRo3u3asQ2AIBAF0MO4p42FI1nYOKlugAUnJvL+BLzwcxGw7Md5RUO2dSmRkNZ1TPGTgICADAIptbGXNVqzUluraoGADAKZv/rIy56UqvVFartVVEu1QEBAQEBAQEBAQEAaz+xuGlXrpWr1PlvbERAQEJCIhzfEnqPYLxwgICBjQW7ewSYPr/zk7gAAAABJRU5ErkJggg==);}' +
@@ -29,7 +32,7 @@ export class BringDataIntoViewControl implements azmaps.Control {
      * @param options Options for defining how the control is rendered and functions.
      */
     constructor(options?: BringDataIntoViewControlOptions) {
-        this._options = Object.assign(this._options, options || {});
+        this.setOptions(options);
     }
 
     /****************************
@@ -44,34 +47,8 @@ export class BringDataIntoViewControl implements azmaps.Control {
      */
     public onAdd(map: azmaps.Map, options?: azmaps.ControlOptions): HTMLElement {
         const self = this;
+        const opt = self._options;
         self._map = map;
-
-        const mcl = map.getMapContainer().classList;
-        if (mcl.contains("high-contrast-dark")) {
-            self._hclStyle = <azmaps.ControlStyle>'dark';
-        } else if (mcl.contains("high-contrast-light")) {
-            self._hclStyle = <azmaps.ControlStyle>'light';
-        }
-
-        let color = 'light';
-
-        if (self._hclStyle) {
-            if (self._hclStyle === 'dark') {
-                color = self._darkColor;
-            }
-        } else {
-            color = self._options.style;
-        }
-
-        if (color === 'light') {
-            color = 'white';
-        } else if (color === 'dark') {
-            color = self._darkColor;
-        } else if (color === 'auto') {
-            //Color will change between light and dark depending on map style.
-            map.events.add('styledata', self._mapStyleChanged);
-            color = self._getColorFromMapStyle();
-        }
 
         const ariaLabel = BringDataIntoViewControl._getAriaLabel(map.getStyle().language);
 
@@ -90,22 +67,25 @@ export class BringDataIntoViewControl implements azmaps.Control {
         //Create the button.
         const btn = document.createElement("button");
         btn.classList.add('azmaps-bringDataIntoViewBtn');
-        btn.style.backgroundColor = color;
         btn.setAttribute('title', ariaLabel);
         btn.setAttribute('alt', ariaLabel);
         btn.setAttribute('type', 'button');
         self._button = btn;
 
+        self._setStyle(opt.style);
+
         btn.addEventListener('click', () => {
             const bbox = azmaps.data.BoundingBox;
-            
+
             //Logic that gets all shapes on the map and calculates the bounding box of the map.            
             let data: azmaps.data.Feature<azmaps.data.Geometry, any>[] = [];
 
             const sources = map.sources.getSources();
             sources.forEach(s => {
                 if (s instanceof azmaps.source.DataSource) {
-                    data = data.concat((<azmaps.source.DataSource>s).toJson().features);
+                    if (!opt.sources || (<string[]>opt.sources).indexOf(s.getId()) > -1) {
+                        data = data.concat((<azmaps.source.DataSource>s).toJson().features);
+                    }
                 }
             });
 
@@ -115,30 +95,34 @@ export class BringDataIntoViewControl implements azmaps.Control {
                 bounds = bbox.fromData(data);
             }
 
-            let pos = [];
+            if (opt.includeMarkers) {
+                let pos = [];
 
-            for (let marker of map.markers['markers'].values()) {
-                pos.push(marker.getOptions().position);
-            }
-
-            if (pos.length > 0) {
-                let b = bbox.fromPositions(pos);
-                if (bounds === null) {
-                    bounds = b;
-                } else {
-                    bounds = bbox.merge(bounds, b);
+                for (let marker of map.markers.getMarkers()) {
+                    pos.push(marker.getOptions().position);
                 }
-            }
 
-            const l = map.layers.getLayers();
-            for (let i = 0; i < l.length; i++) {
-                if (l[i] instanceof azmaps.layer.ImageLayer) {
-                    let b = bbox.fromPositions((<azmaps.layer.ImageLayer>l[i]).getOptions().coordinates);
-
+                if (pos.length > 0) {
+                    let b = bbox.fromPositions(pos);
                     if (bounds === null) {
                         bounds = b;
                     } else {
                         bounds = bbox.merge(bounds, b);
+                    }
+                }
+            }
+
+            if (opt.includeImageLayers) {
+                const l = map.layers.getLayers();
+                for (let i = 0; i < l.length; i++) {
+                    if (l[i] instanceof azmaps.layer.ImageLayer) {
+                        let b = bbox.fromPositions((<azmaps.layer.ImageLayer>l[i]).getOptions().coordinates);
+
+                        if (bounds === null) {
+                            bounds = b;
+                        } else {
+                            bounds = bbox.merge(bounds, b);
+                        }
                     }
                 }
             }
@@ -177,15 +161,98 @@ export class BringDataIntoViewControl implements azmaps.Control {
         }
 
         if (self._options.style === 'auto') {
-            self._map.events.remove('styledata',self._mapStyleChanged);
+            self._map.events.remove('styledata', self._mapStyleChanged);
         }
 
         self._map = null;
     }
 
+    /**
+     * Sets the options on the control.
+     * @param options The options to set.
+     */
+    public setOptions(opt: BringDataIntoViewControlOptions): void {
+        if (opt) {
+            const o = this._options;
+
+            if (typeof opt.padding === 'number' && opt.padding >= 0) {
+                o.padding = opt.padding;
+            }
+
+            if (typeof opt.includeImageLayers === 'boolean') {
+                o.includeImageLayers = opt.includeImageLayers;
+            }
+
+            if (typeof opt.includeMarkers === 'boolean') {
+                o.includeMarkers = opt.includeMarkers;
+            }
+
+            if (opt.style) {
+                this._setStyle(opt.style);
+            }
+
+            if (opt.sources !== undefined) {
+                if (opt.sources === null || opt.sources.length === 0) {
+                    o.sources = null;
+                } else {
+                    const sources: string[] = [];
+
+                    opt.sources.forEach(s => {
+                        sources.push((s instanceof azmaps.source.DataSource) ? s.getId() : s);
+                    });
+
+                    o.sources = sources;
+                }
+            }
+        }
+    }
+
     /****************************
      * Private Methods
      ***************************/
+
+    /**
+     * Sets the style of the control.
+     * @param style The style to set.
+     * @returns 
+     */
+    private _setStyle(style): void {
+        const self = this;
+        const map = self._map;
+
+        //Of style is already 'auto', remove the map event.
+        if (self._options.style === 'auto' && map) {
+            map.events.remove('styledata', self._mapStyleChanged);
+        }
+
+        let color = 'light';
+
+        if (self._hclStyle) {
+            if (self._hclStyle === 'dark') {
+                color = self._darkColor;
+            }
+        } else {
+            color = style;
+        }
+
+        if (color === 'light') {
+            color = 'white';
+        } else if (color === 'dark') {
+            color = self._darkColor;
+        } else if (color === 'auto') {
+            if(map){
+                //Color will change between light and dark depending on map style.
+                map.events.add('styledata', self._mapStyleChanged);
+            }
+            color = self._getColorFromMapStyle();
+        }
+
+        self._options.style = style;
+
+        if(self._button){
+            self._button.style.backgroundColor = color;
+        }
+    }
 
     /**
      * An event handler for when the map style changes. Used when control style is set to auto.
@@ -264,7 +331,7 @@ export class BringDataIntoViewControl implements azmaps.Control {
 
         const val = resx[lang.toLowerCase()];
 
-        if(val){
+        if (val) {
             return val;
         }
 

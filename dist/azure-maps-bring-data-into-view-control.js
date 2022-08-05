@@ -89,13 +89,13 @@ MIT License
             this._hclStyle = null;
             this._options = {
                 style: 'light',
-                padding: 100
+                padding: 100,
+                includeImageLayers: true,
+                includeMarkers: true,
+                sources: null
             };
             this._buttonCSS = '.azmaps-bringDataIntoViewBtn{margin:0;padding:0;border:none;border-collapse:collapse;width:32px;height:32px;text-align:center;cursor:pointer;line-height:32px;background-repeat:no-repeat;background-size:20px;background-position:center center;z-index:200;box-shadow:0px 0px 4px rgba(0,0,0,0.16);background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAABcRAAAXEQHKJvM/AAAAB3RJTUUH4wMIFTgXULHJFAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAhUlEQVRo3u3asQ2AIBAF0MO4p42FI1nYOKlugAUnJvL+BLzwcxGw7Md5RUO2dSmRkNZ1TPGTgICADAIptbGXNVqzUluraoGADAKZv/rIy56UqvVFartVVEu1QEBAQEBAQEBAQEAaz+xuGlXrpWr1PlvbERAQEJCIhzfEnqPYLxwgICBjQW7ewSYPr/zk7gAAAABJRU5ErkJggg==);}' +
                 '.azmaps-bringDataIntoViewBtn:hover{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAABcRAAAXEQHKJvM/AAAAB3RJTUUH4wMIFTcYR5bISgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAABDklEQVRo3u2aMQ+CMBSE7wjGwURXd1cHhb8Cv1L/ikDi7Goc1UESElMXN0UiLaToXcIEbe57vFd4TbneZnsAS7RUnkSEA623mbEZH9hA+KQAPyKBDAXEeOz5rbew5mECWAA4NUxKZ+6MGZMcNQRxDuDwDQgAlHkS3foKc5HGFYCqYYkuVewCEcifg4QWP3mzDr43zJPo0isIgHNHwWWbe8GHIaVv6ZMn0fHp+eWiRWqZjszyr4tdIAIRiEAEIhCBCEQgAhHI8Hr2ugbJGDMr0vjqk9nVZjclefnqjZCc+Bb1T55Cy7md76K0Tq2+e2sVu0AEIpDOQO4e+q31RBdbny6WYhdHOFQjAhGIQIajB80LO3KY+u0wAAAAAElFTkSuQmCC);}';
-            /****************************
-             * Private Methods
-             ***************************/
             /**
              * An event handler for when the map style changes. Used when control style is set to auto.
              */
@@ -105,7 +105,7 @@ MIT License
                     self._button.style.backgroundColor = self._getColorFromMapStyle();
                 }
             };
-            this._options = Object.assign(this._options, options || {});
+            this.setOptions(options);
         }
         /****************************
          * Public Methods
@@ -118,34 +118,8 @@ MIT License
          */
         BringDataIntoViewControl.prototype.onAdd = function (map, options) {
             var self = this;
+            var opt = self._options;
             self._map = map;
-            var mcl = map.getMapContainer().classList;
-            if (mcl.contains("high-contrast-dark")) {
-                self._hclStyle = 'dark';
-            }
-            else if (mcl.contains("high-contrast-light")) {
-                self._hclStyle = 'light';
-            }
-            var color = 'light';
-            if (self._hclStyle) {
-                if (self._hclStyle === 'dark') {
-                    color = self._darkColor;
-                }
-            }
-            else {
-                color = self._options.style;
-            }
-            if (color === 'light') {
-                color = 'white';
-            }
-            else if (color === 'dark') {
-                color = self._darkColor;
-            }
-            else if (color === 'auto') {
-                //Color will change between light and dark depending on map style.
-                map.events.add('styledata', self._mapStyleChanged);
-                color = self._getColorFromMapStyle();
-            }
             var ariaLabel = BringDataIntoViewControl._getAriaLabel(map.getStyle().language);
             //Add the CSS style for the control to the DOM.
             var style = document.createElement('style');
@@ -160,11 +134,11 @@ MIT License
             //Create the button.
             var btn = document.createElement("button");
             btn.classList.add('azmaps-bringDataIntoViewBtn');
-            btn.style.backgroundColor = color;
             btn.setAttribute('title', ariaLabel);
             btn.setAttribute('alt', ariaLabel);
             btn.setAttribute('type', 'button');
             self._button = btn;
+            self._setStyle(opt.style);
             btn.addEventListener('click', function () {
                 var bbox = azmaps.data.BoundingBox;
                 //Logic that gets all shapes on the map and calculates the bounding box of the map.            
@@ -172,31 +146,23 @@ MIT License
                 var sources = map.sources.getSources();
                 sources.forEach(function (s) {
                     if (s instanceof azmaps.source.DataSource) {
-                        data = data.concat(s.toJson().features);
+                        if (!opt.sources || opt.sources.indexOf(s.getId()) > -1) {
+                            data = data.concat(s.toJson().features);
+                        }
                     }
                 });
                 var bounds = null;
                 if (data.length > 0) {
                     bounds = bbox.fromData(data);
                 }
-                var pos = [];
-                for (var _i = 0, _a = map.markers['markers'].values(); _i < _a.length; _i++) {
-                    var marker = _a[_i];
-                    pos.push(marker.getOptions().position);
-                }
-                if (pos.length > 0) {
-                    var b = bbox.fromPositions(pos);
-                    if (bounds === null) {
-                        bounds = b;
+                if (opt.includeMarkers) {
+                    var pos = [];
+                    for (var _i = 0, _a = map.markers.getMarkers(); _i < _a.length; _i++) {
+                        var marker = _a[_i];
+                        pos.push(marker.getOptions().position);
                     }
-                    else {
-                        bounds = bbox.merge(bounds, b);
-                    }
-                }
-                var l = map.layers.getLayers();
-                for (var i = 0; i < l.length; i++) {
-                    if (l[i] instanceof azmaps.layer.ImageLayer) {
-                        var b = bbox.fromPositions(l[i].getOptions().coordinates);
+                    if (pos.length > 0) {
+                        var b = bbox.fromPositions(pos);
                         if (bounds === null) {
                             bounds = b;
                         }
@@ -205,22 +171,39 @@ MIT License
                         }
                     }
                 }
+                if (opt.includeImageLayers) {
+                    var l = map.layers.getLayers();
+                    for (var i = 0; i < l.length; i++) {
+                        if (l[i] instanceof azmaps.layer.ImageLayer) {
+                            var b = bbox.fromPositions(l[i].getOptions().coordinates);
+                            if (bounds === null) {
+                                bounds = b;
+                            }
+                            else {
+                                bounds = bbox.merge(bounds, b);
+                            }
+                        }
+                    }
+                }
                 if (bounds !== null) {
-                    var w = bbox.getWidth(bounds);
-                    var h = bbox.getHeight(bounds);
-                    //If the bounding box is really small, likely a single point, use center/zoom.
-                    if (w < 0.000001 || h < 0.000001) {
-                        map.setCamera({
-                            center: bbox.getCenter(bounds),
-                            zoom: 17
-                        });
+                    try {
+                        var w = bbox.getWidth(bounds);
+                        var h = bbox.getHeight(bounds);
+                        //If the bounding box is really small, likely a single point, use center/zoom.
+                        if (w < 0.000001 || h < 0.000001) {
+                            map.setCamera({
+                                center: bbox.getCenter(bounds),
+                                zoom: 17
+                            });
+                        }
+                        else {
+                            map.setCamera({
+                                bounds: bounds,
+                                padding: self._options.padding
+                            });
+                        }
                     }
-                    else {
-                        map.setCamera({
-                            bounds: bounds,
-                            padding: self._options.padding
-                        });
-                    }
+                    catch (_b) { }
                 }
             });
             c.appendChild(btn);
@@ -239,6 +222,81 @@ MIT License
                 self._map.events.remove('styledata', self._mapStyleChanged);
             }
             self._map = null;
+        };
+        /**
+         * Sets the options on the control.
+         * @param options The options to set.
+         */
+        BringDataIntoViewControl.prototype.setOptions = function (opt) {
+            if (opt) {
+                var o = this._options;
+                if (typeof opt.padding === 'number' && opt.padding >= 0) {
+                    o.padding = opt.padding;
+                }
+                if (typeof opt.includeImageLayers === 'boolean') {
+                    o.includeImageLayers = opt.includeImageLayers;
+                }
+                if (typeof opt.includeMarkers === 'boolean') {
+                    o.includeMarkers = opt.includeMarkers;
+                }
+                if (opt.style) {
+                    this._setStyle(opt.style);
+                }
+                if (opt.sources !== undefined) {
+                    if (opt.sources === null || opt.sources.length === 0) {
+                        o.sources = null;
+                    }
+                    else {
+                        var sources_1 = [];
+                        opt.sources.forEach(function (s) {
+                            sources_1.push((s instanceof azmaps.source.DataSource) ? s.getId() : s);
+                        });
+                        o.sources = sources_1;
+                    }
+                }
+            }
+        };
+        /****************************
+         * Private Methods
+         ***************************/
+        /**
+         * Sets the style of the control.
+         * @param style The style to set.
+         * @returns
+         */
+        BringDataIntoViewControl.prototype._setStyle = function (style) {
+            var self = this;
+            var map = self._map;
+            //Of style is already 'auto', remove the map event.
+            if (self._options.style === 'auto' && map) {
+                map.events.remove('styledata', self._mapStyleChanged);
+            }
+            var color = 'light';
+            if (self._hclStyle) {
+                if (self._hclStyle === 'dark') {
+                    color = self._darkColor;
+                }
+            }
+            else {
+                color = style;
+            }
+            if (color === 'light') {
+                color = 'white';
+            }
+            else if (color === 'dark') {
+                color = self._darkColor;
+            }
+            else if (color === 'auto') {
+                if (map) {
+                    //Color will change between light and dark depending on map style.
+                    map.events.add('styledata', self._mapStyleChanged);
+                }
+                color = self._getColorFromMapStyle();
+            }
+            self._options.style = style;
+            if (self._button) {
+                self._button.style.backgroundColor = color;
+            }
         };
         /**
          * Retrieves the background color for the button based on the map style. This is used when style is set to auto.
