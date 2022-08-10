@@ -1,4 +1,6 @@
 /*
+azure-maps-bring-data-into-view-control Version: 0.0.2
+
 MIT License
 
     Copyright (c) Microsoft Corporation.
@@ -186,24 +188,21 @@ MIT License
                     }
                 }
                 if (bounds !== null) {
-                    try {
-                        var w = bbox.getWidth(bounds);
-                        var h = bbox.getHeight(bounds);
-                        //If the bounding box is really small, likely a single point, use center/zoom.
-                        if (w < 0.000001 || h < 0.000001) {
-                            map.setCamera({
-                                center: bbox.getCenter(bounds),
-                                zoom: 17
-                            });
-                        }
-                        else {
-                            map.setCamera({
-                                bounds: bounds,
-                                padding: self._options.padding
-                            });
-                        }
+                    var w = bbox.getWidth(bounds);
+                    var h = bbox.getHeight(bounds);
+                    //If the bounding box is really small, likely a single point, use center/zoom.
+                    if (w < 0.000001 || h < 0.000001) {
+                        map.setCamera({
+                            center: bbox.getCenter(bounds),
+                            zoom: 17
+                        });
                     }
-                    catch (_b) { }
+                    else {
+                        map.setCamera({
+                            bounds: bounds,
+                            padding: self._options.padding
+                        });
+                    }
                 }
             });
             c.appendChild(btn);
