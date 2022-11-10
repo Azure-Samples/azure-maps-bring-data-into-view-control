@@ -1,6 +1,6 @@
 {
   "name": "azure-maps-bring-data-into-view-control",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "An Azure Maps Web SDK module that provides a control that makes it easy to bring any data loaded on the map into view.",
   "keywords": [
     "azure",

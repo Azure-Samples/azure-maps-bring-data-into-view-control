@@ -1,5 +1,5 @@
 /*
-azure-maps-bring-data-into-view-control Version: 0.0.2
+azure-maps-bring-data-into-view-control Version: 0.0.3
 
 MIT License
 
@@ -191,7 +191,7 @@ MIT License
                     var w = bbox.getWidth(bounds);
                     var h = bbox.getHeight(bounds);
                     //If the bounding box is really small, likely a single point, use center/zoom.
-                    if (w < 0.000001 || h < 0.000001) {
+                    if (w < 0.00001 && h < 0.00001) {
                         map.setCamera({
                             center: bbox.getCenter(bounds),
                             zoom: 17

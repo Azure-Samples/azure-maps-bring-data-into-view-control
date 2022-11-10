@@ -1,5 +1,10 @@
 ## azure-maps-bring-data-into-view-control Changelog
 
+<a name="0.0.3"></a>
+# 0.0.3 (2022-11-10)
+
+- Bug fix for issue #1
+
 <a name="0.0.2"></a>
 # 0.0.2 (2022-08-05)
 
