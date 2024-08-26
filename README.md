@@ -54,7 +54,7 @@ Options for the `BringDataIntoViewControl`.
 | `includeImageLayers` | `boolean` | Specifies if image layer should be included in the data view calculation: Default: `true` |
 | `includeMarkers` | `boolean` | Specifies if HTML markers should be included in the data view calculation: Default: `true` |
 | `padding` | `number` | The amount of pixel padding around the data to account for when setting the map view. Default: `100` |
-| `sources` | `(atlas.source.DataSource \| string)[]` | An arrary of data source objects or IDs to focus on. By default this control will calculate the coverage area of DataSource imstances in the map. |
+| `sources` | `(atlas.source.DataSource \| string)[]` | An arrary of data source objects or IDs to focus on. By default this control will calculate the coverage area of DataSource instances in the map. |
 | `style` | `atlas.ControlStyle` \| `string` | The style of the control. Can be; `light`, `dark`, `auto`, or any CSS3 color. When set to auto, the style will change based on the map style. Overridden if device is in high contrast mode. Default `light`. |
 
 Methods
